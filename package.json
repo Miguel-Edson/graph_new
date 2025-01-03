@@ -1,0 +1,46 @@
+{
+  "name": "testando-sigma",
+  "version": "1.0.0",
+  "description": "trying sigma",
+  "main": "index.js",
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@faker-js/faker": "^9.2.0",
+    "@react-sigma/core": "^4.0.3",
+    "@sigma/edge-curve": "^3.0.0-beta.16",
+    "graphology": "^0.25.4",
+    "graphology-layout": "^0.6.1",
+    "graphology-types": "^0.24.8",
+    "install": "^0.13.0",
+    "npm": "^10.9.1",
+    "papaparse": "^5.4.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-scripts": "^5.0.1",
+    "sigma": "^3.0.0-beta.38"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.13",
+    "@types/react-dom": "^18.3.1",
+    "typescript": "^5.7.2"
+  }
+}

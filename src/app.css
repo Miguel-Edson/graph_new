@@ -1,0 +1,32 @@
+@import url('https://fonts.googleapis.com/css2?family=Playwrite+AT:ital,wght@0,100..400;1,100..400&display=swap');
+
+body{
+    background-color: #1a4146;
+}
+.App{
+
+    background-color: #e8e0c8;
+    border-radius: 15px;
+    color: #1a4146;
+    padding:1em;
+    margin-top: 2em;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: all;
+    
+    
+}
+
+.ex{
+    background-color: #e8e0c8;
+    border-radius: 15px;
+    padding:1em;
+    margin-top: 2em;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: all;
+    
+    
+}
