@@ -1,136 +1,76 @@
-// import React, { useEffect, useMemo, CSSProperties } from "react"; // Importando o React diretamente
+import { FC, CSSProperties, useEffect, useState } from "react";
+import { MultiDirectedGraph } from "graphology";
+import React from "react";
+import { SigmaContainer } from "@react-sigma/core";
+import "@react-sigma/core/lib/react-sigma.min.css";
 
-// import { MultiDirectedGraph as MultiGraphConstructor } from "graphology";
-// import EdgeCurveProgram, { DEFAULT_EDGE_CURVATURE, indexParallelEdgesIndex } from "@sigma/edge-curve";
-// import { EdgeArrowProgram } from "sigma/rendering";
+export const GraphFromJson: FC<{ style: CSSProperties }> = ({ style }) => {
+  const [graph, setGraph] = useState<MultiDirectedGraph | null>(null);
 
-// import { SigmaContainer, useLoadGraph } from "@react-sigma/core";
-// import "@react-sigma/core/lib/react-sigma.min.css";
+  useEffect(() => {
+    fetch("/arquivo2.json")
+      .then((res) => res.json())
+      .then((data) => {
+        const g = new MultiDirectedGraph();
+  
+        const nodes = data.gexf.graph.nodes.node;
+        const edges = data.gexf.graph.edges.edge;
+  
+        const nodeList = Array.isArray(nodes) ? nodes : [nodes];
+        const edgeList = Array.isArray(edges) ? edges : [edges];
+  
+        // Categoriza os nós por prefixo do ID
+        const columns = {
+          A: { x: 0, color: "#1f77b4" }, // Azul
+          B: { x: 4, color: "#ff7f0e" }, // Laranja
+          C: { x: 8, color: "#2ca02c" }  // Verde
+        };
+  
+        const columnCounters: { [key: string]: number } = {
+          A: 0,
+          B: 0,
+          C: 0
+        };
+  
+        nodeList.forEach((node: any) => {
+          const id = node["@id"];
+          const label = node["@label"] || id;
+          const prefix = id.charAt(0) as "A" | "B" | "C";
+  
+          const { x, color } = columns[prefix];
+          const y = columnCounters[prefix]++;
+  
+          g.addNode(id, {
+            label,
+            x,
+            y: -y, // empilha de cima pra baixo
+            size: 10,
+            color
+          });
+        });
+  
+        edgeList.forEach((edge: any) => {
+          g.addEdgeWithKey(
+            edge["@id"],
+            edge["@source"],
+            edge["@target"],
+            { label: edge["@label"] || "" }
+          );
+        });
+  
+        setGraph(g);
+      });
+  }, []);
 
-// import { useRandom } from "./useRandom";
+  if (!graph) return <div>Carregando grafo...</div>;
 
-// interface NodeType {
-//   x: number;
-//   y: number;
-//   label: string;
-//   size: number;
-//   color: string;
-// }
-// interface EdgeType {
-//   type?: string;
-//   label?: string;
-//   size?: number;
-//   curvature?: number;
-//   parallelIndex?: number;
-//   parallelMaxIndex?: number;
-// }
+  return (
+    <SigmaContainer
+      style={style}
+      graph={graph}
+      settings={{ allowInvalidContainer: true }}
+    />
+  );
+};
 
-// const MyGraph: React.FC = () => {
-//   const { faker, randomColor } = useRandom();
-//   const loadGraph = useLoadGraph<NodeType, EdgeType>();
-
-//   useEffect(() => {
-//     // Create the graph
-//     const graph = new MultiGraphConstructor<NodeType, EdgeType>();
-
-//     graph.addNode("a", {
-//       x: 0,
-//       y: 0,
-//       size: faker.number.int({ min: 4, max: 20 }),
-//       color: randomColor(),
-//       label: faker.person.fullName(),
-//     });
-//     graph.addNode("b", {
-//       x: 1,
-//       y: -1,
-//       size: faker.number.int({ min: 4, max: 20 }),
-//       color: randomColor(),
-//       label: faker.person.fullName(),
-//     });
-//     graph.addNode("c", {
-//       x: 3,
-//       y: -2,
-//       size: faker.number.int({ min: 4, max: 20 }),
-//       color: randomColor(),
-//       label: faker.person.fullName(),
-//     });
-//     graph.addNode("d", {
-//       x: 1,
-//       y: -3,
-//       size: faker.number.int({ min: 4, max: 20 }),
-//       color: randomColor(),
-//       label: faker.person.fullName(),
-//     });
-//     graph.addNode("e", {
-//       x: 3,
-//       y: -4,
-//       size: faker.number.int({ min: 4, max: 20 }),
-//       color: randomColor(),
-//       label: faker.person.fullName(),
-//     });
-//     graph.addNode("f", {
-//       x: 4,
-//       y: -5,
-//       size: faker.number.int({ min: 4, max: 20 }),
-//       color: randomColor(),
-//       label: faker.person.fullName(),
-//     });
-
-//     graph.addEdge("a", "b", { label: faker.date.anytime().toISOString(), size: faker.number.int({ min: 1, max: 5 }) });
-//     graph.addEdge("b", "c", { label: faker.date.anytime().toISOString(), size: faker.number.int({ min: 1, max: 5 }) });
-//     graph.addEdge("b", "d", { label: faker.date.anytime().toISOString(), size: faker.number.int({ min: 1, max: 5 }) });
-//     graph.addEdge("c", "b", { label: faker.date.anytime().toISOString(), size: faker.number.int({ min: 1, max: 5 }) });
-//     graph.addEdge("c", "e", { label: faker.date.anytime().toISOString(), size: faker.number.int({ min: 1, max: 5 }) });
-//     graph.addEdge("d", "c", { label: faker.date.anytime().toISOString(), size: faker.number.int({ min: 1, max: 5 }) });
-//     graph.addEdge("d", "e", { label: faker.date.anytime().toISOString(), size: faker.number.int({ min: 1, max: 5 }) });
-//     graph.addEdge("d", "e", { label: faker.date.anytime().toISOString(), size: faker.number.int({ min: 1, max: 5 }) });
-//     graph.addEdge("d", "e", { label: faker.date.anytime().toISOString(), size: faker.number.int({ min: 1, max: 5 }) });
-//     graph.addEdge("d", "e", { label: faker.date.anytime().toISOString(), size: faker.number.int({ min: 1, max: 5 }) });
-//     graph.addEdge("e", "d", { label: faker.date.anytime().toISOString(), size: faker.number.int({ min: 1, max: 5 }) });
-//     graph.addEdge("e", "f", { label: faker.date.anytime().toISOString(), size: faker.number.int({ min: 1, max: 5 }) });
-//     graph.addEdge("f", "e", { label: faker.date.anytime().toISOString(), size: faker.number.int({ min: 1, max: 5 }) });
-//     graph.addEdge("f", "e", { label: faker.date.anytime().toISOString(), size: faker.number.int({ min: 1, max: 5 }) });
-
-//     // Use dedicated helper to identify parallel edges:
-//     indexParallelEdgesIndex(graph, { edgeIndexAttribute: "parallelIndex", edgeMaxIndexAttribute: "parallelMaxIndex" });
-
-//     // Adapt types and curvature of parallel edges for rendering:
-//     graph.forEachEdge((edge, { parallelIndex, parallelMaxIndex }) => {
-//       if (typeof parallelIndex === "number") {
-//         graph.mergeEdgeAttributes(edge, {
-//           type: "curved",
-//           curvature: DEFAULT_EDGE_CURVATURE + (3 * DEFAULT_EDGE_CURVATURE * parallelIndex) / (parallelMaxIndex || 1),
-//         });
-//       } else {
-//         graph.setEdgeAttribute(edge, "type", "straight");
-//       }
-//     });
-
-//     // load the graph in sigma
-//     loadGraph(graph);
-//   }, [loadGraph, faker, randomColor]);
-
-//   return null;
-// };
-
-// export const MultiDirectedGraph: FC<{ style?: CSSProperties }> = ({ style }) => {
-//   // Sigma settings
-//   const settings = useMemo(
-//     () => ({
-//       allowInvalidContainer: true,
-//       renderEdgeLabels: true,
-//       defaultEdgeType: "straight",
-//       edgeProgramClasses: {
-//         straight: EdgeArrowProgram,
-//         curved: EdgeCurveProgram,
-//       },
-//     }),
-//     [],
-//   );
-
-//   return (
-//     <SigmaContainer style={style} graph={MultiGraphConstructor<NodeType, EdgeType>} settings={settings}>
-//       <MyGraph />
-//     </SigmaContainer>
-//   );
-// };
+export default GraphFromJson;
