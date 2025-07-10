@@ -1,13 +1,14 @@
+// LoadGraphWithProp.tsx
 import { FC, CSSProperties, useEffect, useState } from "react";
 import { MultiDirectedGraph } from "graphology";
 import React from "react";
-import { SigmaContainer } from "@react-sigma/core";
+import { SigmaContainer } from "@react-sigma/core"; // Remova useLoadGraph se não estiver usando
 import "@react-sigma/core/lib/react-sigma.min.css";
 import { ControlsContainer, ZoomControl, SearchControl, FullScreenControl } from "@react-sigma/core";
-import { MiniMap } from '@react-sigma/minimap'; // Certifique-se de que a biblioteca está instalada!
+import HighlightNodes from "./HighlightNodes.tsx"; // Importe o componente HighlightNodes
 
 export const LoadGraphWithProp: FC<{ style: CSSProperties }> = ({ style }) => {
-  const [graph, setGraph] = useState<MultiDirectedGraph | null>(null);
+  const [graphData, setGraphData] = useState<MultiDirectedGraph | null>(null);
 
   useEffect(() => {
     fetch("/KnowledgeBaseOptimized.json")
@@ -16,7 +17,6 @@ export const LoadGraphWithProp: FC<{ style: CSSProperties }> = ({ style }) => {
         const g = new MultiDirectedGraph();
         const nodeSet = new Set<string>();
 
-        const nodePositions: Record<string, { x: number; y: number }> = {};
         const columnX = [0, 10, 20, 30];
         const columnYCounter = [0, 0, 0, 0];
 
@@ -28,7 +28,10 @@ export const LoadGraphWithProp: FC<{ style: CSSProperties }> = ({ style }) => {
               x: columnX[column],
               y,
               size: 10,
-              color
+              color,
+              originalColor: color, // Armazena a cor original
+              highlighted: false, // Adiciona a propriedade highlighted
+              dimmed: false,      // Adiciona a NOVA propriedade dimmed
             });
             nodeSet.add(id);
           }
@@ -47,6 +50,7 @@ export const LoadGraphWithProp: FC<{ style: CSSProperties }> = ({ style }) => {
           g.addEdge(sensorId, featureId, {
             label: `${sensorId} → ${featureId}`,
             size: 2,
+            dimmed: false, // Adiciona a propriedade dimmed para as arestas
           });
         }
 
@@ -63,7 +67,8 @@ export const LoadGraphWithProp: FC<{ style: CSSProperties }> = ({ style }) => {
 
           g.addEdge(featureId, modelId, {
             label: `${featureId} → ${modelId}`,
-            size: 2
+            size: 2,
+            dimmed: false,
           });
         }
 
@@ -78,20 +83,21 @@ export const LoadGraphWithProp: FC<{ style: CSSProperties }> = ({ style }) => {
 
           g.addEdge(modelId, finalStatusId, {
             label: `${modelId} → ${finalStatusId}`,
-            size: 2
+            size: 2,
+            dimmed: false,
           });
         }
 
-        setGraph(g);
+        setGraphData(g);
       });
   }, []);
 
-  if (!graph) return <div>Carregando grafo...</div>;
+  if (!graphData) return <div>Carregando grafo...</div>;
 
   return (
     <SigmaContainer
       style={style}
-      graph={graph}
+      graph={graphData}
       settings={{
         allowInvalidContainer: true,
         defaultEdgeColor: "#888",
@@ -99,25 +105,48 @@ export const LoadGraphWithProp: FC<{ style: CSSProperties }> = ({ style }) => {
         renderEdgeLabels: true,
         edgeLabelColor: { color: "#000" },
         defaultEdgeType: "arrow",
-        labelRenderedSizeThreshold: 0, // Garante que labels pequenos sempre apareçam
+        labelRenderedSizeThreshold: 0,
         edgeLabelFont: "Arial, sans-serif",
-        edgeLabelWeight: "bold"
+        edgeLabelWeight: "bold",
+        // Customização de renderização para nós
+        nodeReducer: (node, data) => {
+          const newData = { ...data };
+          if (newData.highlighted) {
+            // Cor de destaque para o nó principal (vermelho)
+            newData.color = "#FF0000"; 
+          } else if (newData.dimmed) {
+            // Cor cinza esmaecida para nós não conectados
+            newData.color = "#D3D3D3"; // LightGray (ou um cinza de sua preferência)
+            // Opcional: reduzir o tamanho ou a opacidade para deixá-los mais apagados
+            // newData.size = data.size * 0.7; 
+          } else {
+            // Volta para a cor original para nós conectados (mas não o principal)
+            newData.color = newData.originalColor;
+          }
+          return newData;
+        },
+        // Customização de renderização para arestas
+        edgeReducer: (edge, data) => {
+          const newData = { ...data };
+          if (newData.dimmed) {
+            newData.color = "#E0E0E0"; // Um cinza bem claro para arestas esmaecidas
+          } else {
+            newData.color = "#888"; // Cor original das arestas conectadas
+          }
+          return newData;
+        },
       }}
     >
+      <HighlightNodes /> {/* Adicione o componente HighlightNodes aqui */}
 
       <ControlsContainer position={"bottom-right"}>
         <ZoomControl />
         <FullScreenControl />
       </ControlsContainer>
-      
+
       <ControlsContainer position={"top-right"}>
         <SearchControl style={{ width: "200px" }} />
       </ControlsContainer>
-
-       <ControlsContainer position={"bottom-left"}> {/* Posicione onde preferir */}
-          <MiniMap width="200px" height="150px" /> {/* Você pode ajustar o width e height */}
-        </ControlsContainer>
-
     </SigmaContainer>
   );
 };
