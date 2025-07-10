@@ -4,6 +4,7 @@ import React from "react";
 import { SigmaContainer } from "@react-sigma/core";
 import "@react-sigma/core/lib/react-sigma.min.css";
 import { ControlsContainer, ZoomControl, SearchControl, FullScreenControl } from "@react-sigma/core";
+import { MiniMap } from '@react-sigma/minimap'; // Certifique-se de que a biblioteca está instalada!
 
 export const LoadGraphWithProp: FC<{ style: CSSProperties }> = ({ style }) => {
   const [graph, setGraph] = useState<MultiDirectedGraph | null>(null);
@@ -112,6 +113,10 @@ export const LoadGraphWithProp: FC<{ style: CSSProperties }> = ({ style }) => {
       <ControlsContainer position={"top-right"}>
         <SearchControl style={{ width: "200px" }} />
       </ControlsContainer>
+
+       <ControlsContainer position={"bottom-left"}> {/* Posicione onde preferir */}
+          <MiniMap width="200px" height="150px" /> {/* Você pode ajustar o width e height */}
+        </ControlsContainer>
 
     </SigmaContainer>
   );

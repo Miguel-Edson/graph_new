@@ -19,6 +19,7 @@ body{
 }
 
 .ex{
+    
     background-color: #e8e0c8;
     border-radius: 15px;
     padding:1em;
@@ -29,4 +30,15 @@ body{
     width: all;
     
     
+}
+
+.graph {
+    width: 600px;
+    height: 400px;
+    background-color: #f3f3f3;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    margin: 20px auto;
+    padding: 10px;
 }
